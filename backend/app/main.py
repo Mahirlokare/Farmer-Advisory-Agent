@@ -7,7 +7,11 @@ from app.services.weather import get_weather
 
 app = FastAPI(title=settings.app_name, version="0.1.0", description="Multilingual farmer decision-support API")
 origins = [x.strip() for x in settings.cors_origins.split(",") if x.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET","POST"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["*"])
+
+@app.get("/")
+async def root():
+    return {"service": "bharat-krishi-ai", "status": "ok", "health": "/health", "docs": "/docs"}
 
 @app.get("/health")
 async def health():
