@@ -7,6 +7,8 @@ def test_root_health():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+    head_response = client.head("/")
+    assert head_response.status_code == 200
 
 def test_health():
     response = client.get("/health")
