@@ -3,6 +3,11 @@ from app.main import app
 
 client = TestClient(app)
 
+def test_root_health():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
 def test_health():
     response = client.get("/health")
     assert response.status_code == 200
@@ -20,3 +25,16 @@ def test_advisory_does_not_invent_recommendations():
     assert response.status_code == 200
     assert response.json()["status"] == "knowledge_base_pending"
     assert response.json()["requires_expert_review"] is True
+
+def test_advisory_cors_preflight():
+    response = client.options(
+        "/api/v1/advisory",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+    assert "POST" in response.headers["access-control-allow-methods"]
