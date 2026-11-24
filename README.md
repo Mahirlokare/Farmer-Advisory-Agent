@@ -15,6 +15,20 @@ English, Hindi, Marathi, Gujarati, Tamil, and Telugu. Language coverage is an in
 ## Repository layout
 See `docs/ARCHITECTURE.md` and `docs/ROADMAP.md`.
 
+## Conversational AI configuration
+
+The advisory endpoint uses an OpenAI-compatible chat-completions provider. It generates answers from the farmer's actual question, crop, location, soil context, selected language and recent conversation history. It is not a fixed-response FAQ bot.
+
+Configure these variables on the backend service (never expose the key in the frontend):
+- `LLM_API_KEY`: API key for the selected model provider (required).
+- `LLM_BASE_URL`: provider API base URL; defaults to `https://api.openai.com/v1`.
+- `LLM_MODEL`: model identifier; defaults to `gpt-4o-mini`.
+- `LLM_TIMEOUT_SECONDS`: request timeout; defaults to 45.
+
+Until `LLM_API_KEY` is configured, the API deliberately returns HTTP 503 with a clear setup message instead of pretending that a model answered. A ChatGPT subscription does not automatically include API credits.
+
+The current model integration is inference with a configured hosted model, not custom fine-tuning. A reviewed Indian agriculture knowledge base (RAG), live mandi/scheme data connectors and a separately evaluated crop-disease vision model remain future integrations. The model must not claim these sources or capabilities are active.
+
 ## Local development
 Backend: `cd backend && python -m venv .venv && pip install -r requirements.txt && uvicorn app.main:app --reload`
 Frontend: `cd frontend && npm install && npm run dev`
