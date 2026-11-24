@@ -9,7 +9,7 @@ app = FastAPI(title=settings.app_name, version="0.1.0", description="Multilingua
 origins = [x.strip() for x in settings.cors_origins.split(",") if x.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["*"])
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
     return {"service": "bharat-krishi-ai", "status": "ok", "health": "/health", "docs": "/docs"}
 
