@@ -5,7 +5,7 @@ from app.schemas import AdvisoryRequest, WeatherRequest
 from app.services.advisory import build_advisory
 from app.services.weather import get_weather
 
-app = FastAPI(title=settings.app_name, version="0.1.0", description="Multilingual farmer decision-support API")
+app = FastAPI(title=settings.app_name, version="0.2.0", description="Multilingual conversational farmer assistant")
 origins = [x.strip() for x in settings.cors_origins.split(",") if x.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["*"])
 
@@ -15,7 +15,7 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "bharat-krishi-ai", "version": "0.1.0"}
+    return {"status": "ok", "service": "bharat-krishi-ai", "version": "0.2.0", "ai_configured": bool(settings.llm_api_key)}
 
 @app.get("/api/v1/languages")
 async def languages():
@@ -23,7 +23,10 @@ async def languages():
 
 @app.post("/api/v1/advisory")
 async def advisory(request: AdvisoryRequest):
-    return build_advisory(request.crop, request.location, request.question, request.language, request.soil_type)
+    return await build_advisory(
+        request.crop, request.location, request.question, request.language,
+        request.soil_type, request.conversation_history
+    )
 
 @app.post("/api/v1/weather")
 async def weather(request: WeatherRequest):
@@ -43,5 +46,4 @@ async def disease_triage(image: UploadFile = File(...)):
     content = await image.read()
     if len(content) > 8 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="Image must be 8 MB or smaller")
-    # No disease model is bundled. Never return a fabricated diagnosis.
-    return {"status":"model_not_configured","model_ready":False,"message":"Image received. Validated crop-disease inference is not configured yet; no diagnosis has been generated. Please consult a local agricultural expert."}
+    return {"status":"model_not_configured","model_ready":False,"message":"Image received and validated. A trained and independently evaluated crop-disease model is not configured, so no diagnosis has been generated. Please consult a local agricultural expert."}
